@@ -8,11 +8,24 @@
 </head>
 <body>
 
+  
 <!-- NAV -->
 <header class="nav">
   <div class="nav-inner">
-    <div class="logo">Starhome Cleaners</div>
 
+    <!-- Logo -->
+    <div class="logo">
+      Starhome Cleaners
+    </div>
+
+    <!-- Hamburger (mobile) -->
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Desktop Menu -->
     <nav class="menu">
       <a href="#services">Services</a>
       <a href="#offers">Offers</a>
@@ -20,7 +33,17 @@
       <a href="#how-it-works">How it Works</a>
     </nav>
 
+    <!-- CTA -->
     <a href="book.html" class="btn-primary">Book now</a>
+  </div>
+
+  <!-- Mobile Dropdown -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#services">Services</a>
+    <a href="#offers">Offers</a>
+    <a href="#reviews">Reviews</a>
+    <a href="#how-it-works">How it Works</a>
+    <a href="book.html" class="mobile-cta">Book Now</a>
   </div>
 </header>
 
@@ -174,6 +197,22 @@
     © 2026 Starhome Cleaners. All rights reserved.
   </div>
 </footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+
+  // Close menu when a link is clicked
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
+    });
+  });
+</script>
 
 
 </body>

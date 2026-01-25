@@ -14,10 +14,15 @@ body {
   color: var(--dark);
 }
 
-/* NAV */
+/* =========================
+   NAVIGATION
+   ========================= */
 .nav {
   background: white;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .nav-inner {
@@ -25,11 +30,100 @@ body {
   margin: auto;
   padding: 1rem 1.5rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.logo { font-weight: 700; }
+.logo {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Desktop menu */
+.menu {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.menu a {
+  text-decoration: none;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+/* CTA */
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  padding: 0.55rem 1.3rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* =========================
+   HAMBURGER
+   ========================= */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.hamburger span {
+  width: 22px;
+  height: 2px;
+  background: #0f172a;
+  display: block;
+}
+
+/* =========================
+   MOBILE MENU
+   ========================= */
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+}
+
+.mobile-menu a {
+  padding: 1rem 1.5rem;
+  text-decoration: none;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.mobile-cta {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 768px) {
+  .menu {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .btn-primary {
+    display: none;
+  }
+
+  .mobile-menu.open {
+    display: flex;
+  }
+}
 
 /* HERO */
 .hero {
