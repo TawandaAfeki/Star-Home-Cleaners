@@ -50,7 +50,13 @@ const SERVICES = {
     name: 'Care Giving',
     steps: ['service', 'care', 'location', 'frequency', 'date', 'contact', 'summary'],
     pricing: () => 2500 * state.frequency
-  }
+  },
+  gardening: {
+  name: 'Gardening Services',
+  steps: ['service', 'location', 'date', 'contact', 'summary'],
+  pricing: () => 500
+}
+
 };
 
 
@@ -75,9 +81,14 @@ if (steps[stepIndex] !== 'summary') {
     stepContainer.innerHTML = `
       <h1>Select a Service</h1>
       <button onclick="selectService('standard')">Standard Cleaning</button>
-      <button onclick="selectService('deep')">Deep Cleaning</button>
-      <button onclick="selectService('moving')">Moving Services</button>
-      <button onclick="selectService('care')">Care Giving</button>
+<button onclick="selectService('deep')">Deep Cleaning</button>
+<button onclick="selectService('gardening')">
+  Garden Landscaping
+</button>
+<button onclick="selectService('moving')">Moving Services</button>
+<button onclick="selectService('care')">Care Giving</button>
+
+
     `;
   }
 
@@ -119,10 +130,35 @@ if (steps[stepIndex] !== 'summary') {
   if (step === 'location') {
     stepContainer.innerHTML = `
       <h1>Service Location</h1>
-      <input placeholder="Enter Address"
-        oninput="state.location = this.value">
+      <input
+  id="locationInput"
+  type="text"
+  placeholder="Start typing your address..."
+/>
     `;
   }
+  
+setTimeout(() => {
+  const input = document.getElementById('locationInput');
+  if (!input) return;
+
+  const autocomplete = new google.maps.places.Autocomplete(input, {
+    types: ['geocode'],
+    componentRestrictions: { country: 'za' } // South Africa
+  });
+
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace();
+
+    if (!place.formatted_address) return;
+
+    state.location = place.formatted_address;
+
+    // Optional: store coordinates (VERY useful later)
+    state.lat = place.geometry.location.lat();
+    state.lng = place.geometry.location.lng();
+  });
+}, 0);
 
   if (step === 'frequency') {
     stepContainer.innerHTML = `
