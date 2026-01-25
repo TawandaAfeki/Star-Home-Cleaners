@@ -108,8 +108,8 @@ body {
    RESPONSIVE
    ========================= */
 @media (max-width: 768px) {
-  .menu {
-    display: none;
+  .nav .menu {
+    display: none !important;
   }
 
   .hamburger {
@@ -124,6 +124,7 @@ body {
     display: flex;
   }
 }
+
 
 /* HERO */
 .hero {
