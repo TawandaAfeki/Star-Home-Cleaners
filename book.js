@@ -103,19 +103,82 @@ if (steps[stepIndex] !== 'summary') {
   }
 
   if (step === 'moving') {
-    stepContainer.innerHTML = `
-      <h1>Move details</h1>
-      <input placeholder="Pickup location"
-        oninput="state.location = this.value">
-      <input placeholder="Drop-off location">
-      <select onchange="state.moveSize = this.value">
-        <option value="">Select size</option>
-        <option value="small">Small (R1000)</option>
-        <option value="medium">Medium (R1500)</option>
-        <option value="large">Large (R3000)</option>
-      </select>
-    `;
+  stepContainer.innerHTML = `
+    <h1>Move details</h1>
+
+    <input
+      id="pickupInput"
+      type="text"
+      placeholder="Start typing your pick-up address..."
+    />
+
+    <input
+      id="dropoffInput"
+      type="text"
+      placeholder="Start typing your drop-off address..."
+    />
+
+    <select
+      id="moveSizeSelect"
+      onchange="state.moveSize = this.value"
+    >
+      <option value="">Select size</option>
+      <option value="small" ${state.moveSize === 'small' ? 'selected' : ''}>
+        Small
+      </option>
+      <option value="medium" ${state.moveSize === 'medium' ? 'selected' : ''}>
+        Medium
+      </option>
+      <option value="large" ${state.moveSize === 'large' ? 'selected' : ''}>
+        Large
+      </option>
+    </select>
+  `;
+}
+
+setTimeout(() => {
+  const pickupInput = document.getElementById('pickupInput');
+  const dropoffInput = document.getElementById('dropoffInput');
+
+  if (pickupInput) {
+    const pickupAutocomplete = new google.maps.places.Autocomplete(
+      pickupInput,
+      {
+        types: ['geocode'],
+        componentRestrictions: { country: 'za' }
+      }
+    );
+
+    pickupAutocomplete.addListener('place_changed', () => {
+      const place = pickupAutocomplete.getPlace();
+      if (!place.formatted_address) return;
+
+      state.pickupLocation = place.formatted_address;
+      state.pickupLat = place.geometry.location.lat();
+      state.pickupLng = place.geometry.location.lng();
+    });
   }
+
+  if (dropoffInput) {
+    const dropoffAutocomplete = new google.maps.places.Autocomplete(
+      dropoffInput,
+      {
+        types: ['geocode'],
+        componentRestrictions: { country: 'za' }
+      }
+    );
+
+    dropoffAutocomplete.addListener('place_changed', () => {
+      const place = dropoffAutocomplete.getPlace();
+      if (!place.formatted_address) return;
+
+      state.dropoffLocation = place.formatted_address;
+      state.dropoffLat = place.geometry.location.lat();
+      state.dropoffLng = place.geometry.location.lng();
+    });
+  }
+}, 0);
+
 
   if (step === 'care') {
     stepContainer.innerHTML = `
@@ -137,7 +200,7 @@ if (steps[stepIndex] !== 'summary') {
 />
     `;
   }
-  
+
 setTimeout(() => {
   const input = document.getElementById('locationInput');
   if (!input) return;
@@ -182,19 +245,61 @@ setTimeout(() => {
   if (step === 'summary') {
   const total = SERVICES[state.service].pricing();
 
+  let cartItems = '';
+
+  if (state.service === 'standard' || state.service === 'deep') {
+    cartItems = `
+      <div class="cart-item">
+        <span>Bedrooms</span>
+        <div class="qty">
+          <button type="button" onclick="updateQty('bedrooms', -1)">−</button>
+<span>${state.bedrooms}</span>
+<button type="button" onclick="updateQty('bedrooms', 1)">+</button>
+
+        </div>
+      </div>
+
+      <div class="cart-item">
+        <span>Bathrooms</span>
+        <div class="qty">
+          <button type="button" onclick="updateQty('bathrooms', -1)">−</button>
+<span>${state.bathrooms}</span>
+<button type="button" onclick="updateQty('bathrooms', 1)">+</button>
+
+        </div>
+      </div>
+    `;
+  }
+
   stepContainer.innerHTML = `
-    <h1>Booking Summary</h1>
+    <h1>Review Your Booking</h1>
 
-    <p><strong>Service:</strong> ${SERVICES[state.service].name}</p>
-    <p><strong>Email:</strong> ${state.email}</p>
-    <p><strong>Phone:</strong> ${state.phone}</p>
-    <p><strong>Total:</strong> R${total}</p>
+    <!-- BOOKING DETAILS -->
+    <div class="summary-block">
+      <p><strong>Service:</strong> ${SERVICES[state.service].name}</p>
+      <p><strong>Location:</strong> ${state.location} </p>
+      <p><strong>Date:</strong> ${state.date}</p>
+      ${state.frequency !== 1 ? `<p><strong>Frequency:</strong> Applied</p>` : ''}
+      <p><strong>Email:</strong> ${state.email}</p>
+      <p><strong>Phone:</strong> ${state.phone}</p>
+    </div>
 
-    <button onclick="alert('Proceeding to payment')">
+    <!-- CART -->
+    <div class="cart">
+      ${cartItems}
+
+      <div class="cart-total">
+        <span>Total</span>
+        <strong>R${total}</strong>
+      </div>
+    </div>
+
+    <button class="pay-btn" onclick="alert('Proceeding to payment')">
       Pay Now
     </button>
   `;
 }
+
 
 
   if (step === 'contact') {
@@ -272,7 +377,7 @@ function validateStep(step) {
     if (!state.bedrooms || state.bedrooms <= 0) {
       showError(
         document.querySelector('input[placeholder="Bedrooms"]'),
-        'Please enter number of bedrooms'
+        'Please Enter Number of Bedrooms'
       );
       valid = false;
     }
@@ -280,7 +385,7 @@ function validateStep(step) {
     if (!state.bathrooms || state.bathrooms <= 0) {
       showError(
         document.querySelector('input[placeholder="Bathrooms"]'),
-        'Please enter number of bathrooms'
+        'Please Enter Number of Bathrooms'
       );
       valid = false;
     }
@@ -297,32 +402,36 @@ function validateStep(step) {
   }
 
   if (step === 'moving') {
-    const inputs = document.querySelectorAll('#stepContainer input');
-
-    if (!inputs[0].value.trim()) {
-      showError(inputs[0], 'Pickup Location is Required');
-      valid = false;
-    }
-
-    if (!inputs[1].value.trim()) {
-      showError(inputs[1], 'Drop-off Location is Required');
-      valid = false;
-    }
-
-    if (!state.moveSize) {
-      showError(
-        document.querySelector('select'),
-        'Please select move size'
-      );
-      valid = false;
-    }
+  if (!state.pickupLocation) {
+    showError(
+      document.getElementById('pickupInput'),
+      'Pick-up Location is Required'
+    );
+    valid = false;
   }
+
+  if (!state.dropoffLocation) {
+    showError(
+      document.getElementById('dropoffInput'),
+      'Drop-off Location is Required'
+    );
+    valid = false;
+  }
+
+  if (!state.moveSize) {
+    showError(
+      document.getElementById('moveSizeSelect'),
+      'Please Select Move Size'
+    );
+    valid = false;
+  }
+}
 
   if (step === 'care') {
     if (!state.age || state.age <= 0) {
       showError(
         document.querySelector('input[type="number"]'),
-        'Please enter age'
+        'Please Enter Age'
       );
       valid = false;
     }
@@ -330,7 +439,7 @@ function validateStep(step) {
     if (!state.specialNeeds.trim()) {
       showError(
         document.querySelector('textarea'),
-        'Please describe special needs'
+        'Please Describe Special Needs'
       );
       valid = false;
     }
@@ -340,7 +449,7 @@ function validateStep(step) {
     if (!state.date) {
       showError(
         document.querySelector('input[type="date"]'),
-        'Please select a date'
+        'Please Select a Date'
       );
       valid = false;
     }
@@ -351,12 +460,12 @@ function validateStep(step) {
   const phoneInput = document.querySelector('input[type="tel"]');
 
   if (!state.email || !state.email.includes('@')) {
-    showError(emailInput, 'Please enter a valid email address');
+    showError(emailInput, 'Please Enter a Valid Email Address');
     valid = false;
   }
 
   if (!state.phone || state.phone.length < 8) {
-    showError(phoneInput, 'Please enter a valid phone number');
+    showError(phoneInput, 'Please Enter a Valid Phone Number');
     valid = false;
   }
 }
@@ -364,3 +473,12 @@ function validateStep(step) {
 
   return valid;
 }
+window.updateQty = function (field, change) {
+  state[field] += change;
+
+  if (state[field] < 1) {
+    state[field] = 1;
+  }
+
+  renderStep();
+};
