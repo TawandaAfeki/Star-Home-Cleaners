@@ -95,19 +95,36 @@ if (steps[stepIndex] !== 'summary') {
 
 
   if (step === 'service') {
-    stepContainer.innerHTML = `
-      <h1>Select a Service</h1>
-      <button onclick="selectService('standard')">Standard Cleaning<small><p class="subtitle">Regular Maintenance</p></small></button>
-<button onclick="selectService('deep')">Deep Cleaning<small><p class="subtitle">Detailed Maintenance</p></small></button>
-<button onclick="selectService('gardening')">
-  Garden Landscaping<small><p class="subtitle">Detailed Outdoor Maintenance</p></small>
-</button>
-<button onclick="selectService('moving')">Moving Services<small><p class="subtitle">Complete Property Clean</p></small></button>
-<button onclick="selectService('care')">Care Giving<small><p class="subtitle">Assisting People in Need</p></small></button>
+  stepContainer.innerHTML = `
+    <h1>Select a Service</h1>
 
+    <button onclick="selectService('standard')">
+      <span class="title">Standard Cleaning</span>
+      <span class="subtitle"><small>Regular Maintenance</small></span>
+    </button>
 
-    `;
-  }
+    <button onclick="selectService('deep')">
+      <span class="title">Deep Cleaning</span>
+      <span class="subtitle"><small>Detailed Maintenance</small></span>
+    </button>
+
+    <button onclick="selectService('gardening')">
+      <span class="title">Garden Landscaping</span>
+      <span class="subtitle"><small>Detailed Outdoor Maintenance</small></span>
+    </button>
+
+    <button onclick="selectService('moving')">
+      <span class="title">Moving Services</span>
+      <span class="subtitle"><small>Complete Property Clean</small></span>
+    </button>
+
+    <button onclick="selectService('care')">
+      <span class="title">Care Giving</span>
+      <span class="subtitle"><small>Assisting People in Need</small></span>
+    </button>
+  `;
+}
+
 
   if (step === 'rooms') {
     stepContainer.innerHTML = `
