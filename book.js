@@ -344,7 +344,7 @@ if (extrasAllowed) {
       <p><strong>Service:</strong> ${SERVICES[state.service].name}</p>
       <p><strong>Location:</strong> ${state.location} </p>
       <p><strong>Date:</strong> ${state.date}</p>
-      ${state.frequency !== 1 ? `<p><strong>Frequency:</strong> Applied</p>` : ''}
+      ${state.frequency !== 1 ? `<p><strong>Frequency:</strong> Applied ${state.frequency}</p>` : ''}
       <p><strong>Email:</strong> ${state.email}</p>
       <p><strong>Phone:</strong> ${state.phone}</p>
     </div>

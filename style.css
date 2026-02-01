@@ -10,8 +10,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  text-transform: uppercase;
+  font-family: 'Playfair Display';
   letter-spacing: 0.05em;
   color: var(--dark);
 }
