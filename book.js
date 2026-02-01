@@ -17,7 +17,12 @@ const state = {
   age: '',
   specialNeeds: '',
   email: '',
-  phone: ''
+  phone: '',
+  extras: {
+  oven: 0,
+  windows: 0,
+  walls: 0
+}
 };
 
 
@@ -56,7 +61,11 @@ const SERVICES = {
   steps: ['service', 'location', 'date', 'contact', 'summary'],
   pricing: () => 500
 }
-
+};
+const EXTRAS_PRICES = {
+  oven: 150,
+  windows: 150,
+  walls: 200
 };
 
 
@@ -72,6 +81,14 @@ function renderStep() {
   backBtn.style.visibility = stepIndex === 0 ? 'hidden' : 'visible';
   nextBtn.disabled = false;
 
+  // Hide Next button on final (summary) step
+if (step === 'summary') {
+  nextBtn.style.display = 'none';
+} else {
+  nextBtn.style.display = 'inline-block';
+}
+
+
 if (steps[stepIndex] !== 'summary') {
   nextBtn.disabled = false;
 }
@@ -80,13 +97,13 @@ if (steps[stepIndex] !== 'summary') {
   if (step === 'service') {
     stepContainer.innerHTML = `
       <h1>Select a Service</h1>
-      <button onclick="selectService('standard')">Standard Cleaning</button>
-<button onclick="selectService('deep')">Deep Cleaning</button>
+      <button onclick="selectService('standard')">Standard Cleaning<small><p class="subtitle">Regular Maintenance</p></small></button>
+<button onclick="selectService('deep')">Deep Cleaning<small><p class="subtitle">Detailed Maintenance</p></small></button>
 <button onclick="selectService('gardening')">
-  Garden Landscaping
+  Garden Landscaping<small><p class="subtitle">Detailed Outdoor Maintenance</p></small>
 </button>
-<button onclick="selectService('moving')">Moving Services</button>
-<button onclick="selectService('care')">Care Giving</button>
+<button onclick="selectService('moving')">Moving Services<small><p class="subtitle">Complete Property Clean</p></small></button>
+<button onclick="selectService('care')">Care Giving<small><p class="subtitle">Assisting People in Need</p></small></button>
 
 
     `;
@@ -227,10 +244,10 @@ setTimeout(() => {
     stepContainer.innerHTML = `
       <h1>How Often?</h1>
       <select onchange="state.frequency = +this.value">
-        <option value="1">One-time</option>
-        <option value="0.85">Weekly (save 15%)</option>
-        <option value="0.9">Bi-weekly (save 10%)</option>
-        <option value="0.95">Monthly (save 5%)</option>
+        <option value="1">Once</option>
+        <option value="0.85">Weekly <small>15% off</small></option>
+        <option value="0.9">Bi-weekly <small>10% off</small></option>
+        <option value="0.95">Monthly <small>5% off</small></option>
       </select>
     `;
   }
@@ -243,7 +260,55 @@ setTimeout(() => {
   }
 
   if (step === 'summary') {
-  const total = SERVICES[state.service].pricing();
+  const baseTotal = SERVICES[state.service].pricing();
+
+const extrasTotal =
+  state.extras.oven * EXTRAS_PRICES.oven +
+  state.extras.windows * EXTRAS_PRICES.windows +
+  state.extras.walls * EXTRAS_PRICES.walls;
+
+const total = baseTotal + extrasTotal;
+
+let extrasHTML = '';
+
+const extrasAllowed = ['standard', 'deep', 'moving'].includes(state.service);
+
+if (extrasAllowed) {
+  extrasHTML = `
+    <h3>Add extras</h3>
+
+    <div class="cart-item">
+      <span>Oven Cleaning</span>
+      <div class="qty">
+        <button type="button" onclick="updateExtra('oven', -1)">−</button>
+        <span>${state.extras.oven}</span>
+        <button type="button" onclick="updateExtra('oven', 1)">+</button>
+        
+      </div>
+    </div>
+
+    <div class="cart-item">
+      <span>Window Cleaning</span>
+      <div class="qty">
+        <button type="button" onclick="updateExtra('windows', -1)">−</button>
+        <span>${state.extras.windows}</span>
+        <button type="button" onclick="updateExtra('windows', 1)">+</button>
+        
+      </div>
+    </div>
+
+    <div class="cart-item">
+      <span>Wall Cleaning</span>
+      <div class="qty">
+        <button type="button" onclick="updateExtra('walls', -1)">−</button>
+        <span>${state.extras.walls}</span>
+        <button type="button" onclick="updateExtra('walls', 1)">+</button>
+        
+      </div>
+    </div>
+  `;
+}
+
 
   let cartItems = '';
 
@@ -284,15 +349,16 @@ setTimeout(() => {
       <p><strong>Phone:</strong> ${state.phone}</p>
     </div>
 
-    <!-- CART -->
     <div class="cart">
-      ${cartItems}
+  ${cartItems}
+  ${extrasHTML}
 
-      <div class="cart-total">
-        <span>Total</span>
-        <strong>R${total}</strong>
-      </div>
-    </div>
+  <div class="cart-total">
+    <span>Total</span>
+    <strong>R${total}</strong>
+  </div>
+</div>
+
 
     <button class="pay-btn" onclick="alert('Proceeding to payment')">
       Pay Now
@@ -482,3 +548,13 @@ window.updateQty = function (field, change) {
 
   renderStep();
 };
+window.updateExtra = function (extra, change) {
+  state.extras[extra] += change;
+
+  if (state.extras[extra] < 0) {
+    state.extras[extra] = 0;
+  }
+
+  renderStep();
+};
+
