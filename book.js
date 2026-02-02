@@ -624,15 +624,26 @@ window.reserveService = function () {
 
   emailjs.send(
     'service_lp7z0ve',
+    'template_4h13jjh',
+    templateParams
+  );
+
+  emailjs.send(
+    'service_lp7z0ve',
     'template_4t8pk4z',
     templateParams
   )
   .then(() => {
     alert(
-      'Reservation successful!\n\n' +
-      'A confirmation email has been sent.\n' +
-      'If you do not receive the email within 5 minutes, please check Spam folder. \n' +
-      'Payment will be made in cash after service completion.');
+  "Reservation successful!\n\n" +
+  "A confirmation email has been sent.\n" +
+  "If you do not receive the email within 5 minutes, please check your Spam folder.\n\n" +
+  "Payment will be made in cash after service completion."
+);
+
+// Redirect AFTER user clicks OK
+window.location.href = "/";
+
   })
   .catch(() => {
     alert('Something went wrong sending the email. Please try again.');
