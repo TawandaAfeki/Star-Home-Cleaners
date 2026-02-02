@@ -92,6 +92,7 @@ body {
   max-width: 520px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
+  padding-top: 2rem; /* space for sticky total */
   position: relative;
 }
 
@@ -448,4 +449,5 @@ button .subtitle {
   margin: 0;              /* just in case */
   line-height: 1.2;
 }
+
 

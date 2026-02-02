@@ -33,8 +33,19 @@ const SERVICES = {
   standard: {
     name: 'Standard Cleaning',
     steps: ['service', 'rooms', 'location', 'frequency', 'date', 'contact', 'summary'],
-    pricing: () =>
-      (state.bedrooms * 120 + state.bathrooms * 150) * state.frequency
+    pricing: () => {
+  const base = 200;
+  const bedroomRate = 60;
+  const bathroomRate = 80;
+
+  const subtotal =
+    base +
+    state.bedrooms * bedroomRate +
+    state.bathrooms * bathroomRate;
+
+  return Math.round(subtotal * state.frequency);
+}
+
   },
   deep: {
     name: 'Deep Cleaning',
@@ -59,7 +70,19 @@ const SERVICES = {
   gardening: {
   name: 'Gardening Services',
   steps: ['service', 'location', 'date', 'contact', 'summary'],
-  pricing: () => 500
+  pricing: () => {
+  const base = 800;
+  const bedroomRate = 120;
+  const bathroomRate = 150;
+
+  const subtotal =
+    base +
+    state.bedrooms * bedroomRate +
+    state.bathrooms * bathroomRate;
+
+  return Math.round(subtotal * state.frequency);
+}
+
 }
 };
 const EXTRAS_PRICES = {
@@ -377,9 +400,10 @@ if (extrasAllowed) {
 </div>
 
 
-    <button class="pay-btn" onclick="alert('Proceeding to payment')">
-      Pay Now
-    </button>
+    <button class="pay-btn" onclick="reserveService()">
+  Reserve Service
+</button>
+
   `;
 }
 
@@ -574,4 +598,45 @@ window.updateExtra = function (extra, change) {
 
   renderStep();
 };
+
+window.reserveService = function () {
+  const extrasList = [];
+
+  if (state.extras.oven > 0) extrasList.push(`Oven Cleaning x${state.extras.oven}`);
+  if (state.extras.windows > 0) extrasList.push(`Window Cleaning x${state.extras.windows}`);
+  if (state.extras.walls > 0) extrasList.push(`Wall Cleaning x${state.extras.walls}`);
+
+  const total =
+    SERVICES[state.service].pricing() +
+    state.extras.oven * EXTRAS_PRICES.oven +
+    state.extras.windows * EXTRAS_PRICES.windows +
+    state.extras.walls * EXTRAS_PRICES.walls;
+
+  const templateParams = {
+    name: state.email,
+    service: SERVICES[state.service].name,
+    date: state.date,
+    location: state.location || state.pickupLocation,
+    extras: extrasList.length ? extrasList.join(', ') : 'None',
+    total: total,
+    email: state.email
+  };
+
+  emailjs.send(
+    'service_lp7z0ve',
+    'template_4t8pk4z',
+    templateParams
+  )
+  .then(() => {
+    alert(
+      'Reservation successful!\n\n' +
+      'A confirmation email has been sent.\n' +
+      'If you do not receive the email within 5 minutes, please check Spam folder. \n' +
+      'Payment will be made in cash after service completion.');
+  })
+  .catch(() => {
+    alert('Something went wrong sending the email. Please try again.');
+  });
+};
+
 
