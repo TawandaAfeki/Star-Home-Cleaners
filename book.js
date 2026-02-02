@@ -613,40 +613,45 @@ window.reserveService = function () {
     state.extras.walls * EXTRAS_PRICES.walls;
 
   const templateParams = {
-    name: state.email,
     service: SERVICES[state.service].name,
     date: state.date,
     location: state.location || state.pickupLocation,
     extras: extrasList.length ? extrasList.join(', ') : 'None',
     total: total,
-    email: state.email
+    email: state.email,
+    phone: state.phone,
+    bedrooms: state.bedrooms,
+    bathrooms: state.bathrooms
   };
 
-  emailjs.send(
-    'service_lp7z0ve',
-    'template_4h13jjh',
-    templateParams
-  );
+  Promise.all([
+    // ADMIN EMAIL
+    emailjs.send(
+      'service_lp7z0ve',
+      'template_4h13jjh',
+      templateParams
+    ),
 
-  emailjs.send(
-    'service_lp7z0ve',
-    'template_4t8pk4z',
-    templateParams
-  )
+    // CUSTOMER EMAIL
+    emailjs.send(
+      'service_lp7z0ve',
+      'template_4t8pk4z',
+      templateParams
+    )
+  ])
   .then(() => {
     alert(
-  "Reservation successful!\n\n" +
-  "A confirmation email has been sent.\n" +
-  "If you do not receive the email within 5 minutes, please check your Spam folder.\n\n" +
-  "Payment will be made in cash after service completion."
-);
+      "Reservation successful!\n\n" +
+      "A confirmation email has been sent.\n" +
+      "If you do not receive the email within 5 minutes, please check your Spam folder.\n\n" +
+      "Payment will be made in cash after service completion."
+    );
 
-// Redirect AFTER user clicks OK
-window.location.href = "/";
-
+    window.location.href = "/";
   })
-  .catch(() => {
-    alert('Something went wrong sending the email. Please try again.');
+  .catch((error) => {
+    console.error('EmailJS error:', error);
+    alert('Reservation failed. Please try again or contact us directly.');
   });
 };
 
