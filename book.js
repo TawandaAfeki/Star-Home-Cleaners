@@ -18,6 +18,9 @@ const state = {
   specialNeeds: '',
   email: '',
   phone: '',
+  careHours: '',
+  time: '',
+careIsNight: false,
   extras: {
   oven: 0,
   windows: 0,
@@ -50,8 +53,19 @@ const SERVICES = {
   deep: {
     name: 'Deep Cleaning',
     steps: ['service', 'rooms', 'location', 'frequency', 'date', 'contact', 'summary'],
-    pricing: () =>
-      (state.bedrooms * 180 + state.bathrooms * 200) * state.frequency
+    pricing: () => {
+  const base = 800;
+  const bedroomRate = 120;
+  const bathroomRate = 150;
+
+  const subtotal =
+    base +
+    state.bedrooms * bedroomRate +
+    state.bathrooms * bathroomRate;
+
+  return Math.round(subtotal * state.frequency);
+}
+
   },
   moving: {
     name: 'Moving Services',
@@ -63,24 +77,37 @@ const SERVICES = {
     })[state.moveSize]
   },
   care: {
-    name: 'Care Giving',
-    steps: ['service', 'care', 'location', 'frequency', 'date', 'contact', 'summary'],
-    pricing: () => 2500 * state.frequency
-  },
+  name: 'Care Giving',
+  steps: ['service', 'care', 'location', 'frequency', 'date', 'contact', 'summary'],
+  pricing: () => {
+    const CARE_PRICES = {
+      3: 300,
+      4: 350,
+      5: 500,
+      6: 450,
+      8: 500
+    };
+
+    let basePrice = CARE_PRICES[state.careHours] || 0;
+
+    if (state.careIsNight) {
+      basePrice *= 1.15; // 15% night surcharge
+    }
+
+    return Math.round(basePrice * state.frequency);
+  }
+}
+,
   gardening: {
   name: 'Gardening Services',
   steps: ['service', 'location', 'date', 'contact', 'summary'],
   pricing: () => {
-  const base = 800;
-  const bedroomRate = 120;
-  const bathroomRate = 150;
+  const base = "Final pricing will be confirmed after an on-site garden assessment.";
 
   const subtotal =
-    base +
-    state.bedrooms * bedroomRate +
-    state.bathrooms * bathroomRate;
+    base;
 
-  return Math.round(subtotal * state.frequency);
+  return subtotal; 
 }
 
 }
@@ -238,14 +265,50 @@ setTimeout(() => {
 
 
   if (step === 'care') {
-    stepContainer.innerHTML = `
-      <h1>Care Details</h1>
-      <input type="number" placeholder="Age"
-        oninput="state.age = this.value">
-      <textarea placeholder="Special Needs"
-        oninput="state.specialNeeds = this.value"></textarea>
-    `;
-  }
+  stepContainer.innerHTML = `
+    <h1>Care Details</h1>
+
+    <input
+      type="number"
+      placeholder="Age"
+      oninput="state.age = this.value"
+    />
+
+    <textarea
+      placeholder="Special Needs"
+      oninput="state.specialNeeds = this.value"
+    ></textarea>
+
+   <label for="appt">Start Time</label>
+<input
+  type="time"
+  id="appt"
+  name="appt"
+  oninput="state.time = this.value"
+/>
+
+    <label>Care Duration</label>
+    <select onchange="state.careHours = +this.value">
+      <option value="">Select hours</option>
+      <option value="3">3 Hours</option>
+      <option value="4">4 Hours</option>
+      <option value="5">5 Hours</option>
+      <option value="6">6 Hours</option>
+      <option value="8">8 Hours</option>
+    </select>
+
+    <label class="checkbox">
+      Night hours<input
+        type="checkbox"
+        onchange="state.careIsNight = this.checked"
+      />
+       (+15%)
+    </label>
+  `;
+}
+
+
+
 
   if (step === 'location') {
     stepContainer.innerHTML = `
@@ -376,12 +439,44 @@ if (extrasAllowed) {
     `;
   }
 
+  if (state.service === 'gardening') {
+    stepContainer.innerHTML = `
+    <h1>Review Your Booking</h1>
+
+    <!-- BOOKING DETAILS -->
+    <div class="summary-block">
+      <p><strong>Service:</strong> ${SERVICES[state.service].name}</p>
+      <p><strong>Location:</strong> ${state.location} </p>
+      <p><strong>Date:</strong> ${state.date}</p>
+      ${state.frequency !== 1 ? `<p><strong>Frequency:</strong> Applied ${state.frequency}</p>` : ''}
+      <p><strong>Email:</strong> ${state.email}</p>
+      <p><strong>Phone:</strong> ${state.phone}</p>
+    </div>
+
+    
+  <div class="cart-total">
+    <span><strong>${total}</strong></span>
+  </div>
+
+
+    <button class="pay-btn" onclick="reserveService()">
+  Reserve Service
+</button>
+
+  `;
+
+  } else {
+
   stepContainer.innerHTML = `
     <h1>Review Your Booking</h1>
 
     <!-- BOOKING DETAILS -->
     <div class="summary-block">
       <p><strong>Service:</strong> ${SERVICES[state.service].name}</p>
+      <p><strong>Start Time:</strong> ${state.time} hours</p>
+      <p><strong>Care Duration:</strong> ${state.careHours} hours</p>
+${state.careIsNight ? '<p><strong>Night Care:</strong> Yes (+15%)</p>' : ''}
+
       <p><strong>Location:</strong> ${state.location} </p>
       <p><strong>Date:</strong> ${state.date}</p>
       ${state.frequency !== 1 ? `<p><strong>Frequency:</strong> Applied ${state.frequency}</p>` : ''}
@@ -405,7 +500,7 @@ if (extrasAllowed) {
 </button>
 
   `;
-}
+} }
 
 
 
